@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="pinjam_buku_view_list" model="ir.ui.view">
+            <field name="name">pinjam_buku_view_list</field>
+            <field name="model">pinjam.buku</field>
+            <field name="arch" type="xml">
+                <list string="Pinjam Buku">
+                    <field name="name"/>
+                    <field name="siswa"/>
+                    <field name="buku"/>
+                    <field name="tanggal_peminjaman"/>
+                    <field name="tanggal_jatuh_tempo"/>
+                    <field name="tanggal_pengembalian"/>
+                    <field name="jumlah_hari_terlambat"/>
+                    <field name="total_denda"/>
+                    <field name="status"/>
+                    <button
+                            name="action_kembalikan"
+                            string="Kembalikan"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="status not in ['dipinjam', 'terlambat']"
+                     />
+                </list>
+            </field>
+        </record>
+
+        <record id="pinjam_buku_view_form" model="ir.ui.view">
+            <field name="name">pinjam_buku_view_form</field>
+            <field name="model">pinjam.buku</field>
+            <field name="arch" type="xml">
+                <form string="Pinjam Buku">
+                    <sheet>
+                        <header>
+                            <button
+                                name="action_pinjam"
+                                string="Pinjam Buku"
+                                type="object"
+                                class="btn-primary"
+                                invisible="status not in ['dipinjam', 'terlambat']"                            />
+
+                        </header>
+                        <group>
+                            <field name="name"/>
+                            <field name="siswa"/>
+                            <field name="buku"/>
+                            <field name="tanggal_peminjaman"/>
+                            <field name="tanggal_jatuh_tempo"/>
+                            <field name="tanggal_pengembalian"  invisible="status != 'dikembalikan'"/>
+                            <field name="status" readonly="1"/>
+                            <field name="jumlah_hari_terlambat" readonly="1"/>
+                            <field name="denda_per_hari"/>
+                            <field name="total_denda" readonly="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="pinjam_buku_view_search" model="ir.ui.view">
+            <field name="name">pinjam.buku.search</field>
+            <field name="model">pinjam.buku</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <field name="siswa"/>
+                    <field name="buku"/>
+                    <filter
+                        name="filter_dipinjam"
+                        string="Dipinjam"
+                        domain="[('status', '=', 'dipinjam')]"
+                    />
+                    <filter
+                        name="filter_terlambat"
+                        string="Terlambat"
+                        domain="[('status', '=', 'terlambat')]"
+                    />
+                    <filter
+                        name="filter_dikembalikan"
+                        string="Dikembalikan"
+                        domain="[('status', '=', 'dikembalikan')]"
+                    />
+
+                    <separator/>
+                    <filter
+                        name="group_status"
+                        string="Status"
+                        context="{'group_by': 'status'}"
+                    />
+                    <filter
+                        name="group_siswa"
+                        string="Siswa"
+                        context="{'group_by': 'siswa'}"
+                    />
+                    <filter
+                        name="group_buku"
+                        string="Buku"
+                        context="{'group_by': 'buku'}"
+                    />
+                </search>
+            </field>
+        </record>
+
+        <record id="pinjam_buku_action" model="ir.actions.act_window">
+            <field name="name">Pinjam Buku</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">pinjam.buku</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="pinjam_buku_view_search"/>
+        </record>
+        <menuitem id="menu_item_pinjam_buku" name="Pinjam Buku" parent="perpustakaan.menu_item_perpustakaan" action="pinjam_buku_action" sequence="1"/>
+    </data>
+</odoo>

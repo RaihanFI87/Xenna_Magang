@@ -1,0 +1,9 @@
+<odoo>
+    <record id="seq_pinjam_buku" model="ir.sequence">
+        <field name="name">Peminjaman Buku</field>
+        <field name="code">pinjam.buku</field>
+        <field name="prefix">PJ-</field>
+        <field name="padding">5</field>
+        <field name="number_increment">1</field>
+    </record>
+</odoo>

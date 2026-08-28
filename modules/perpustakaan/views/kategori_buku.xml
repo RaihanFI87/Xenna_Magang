@@ -1,0 +1,34 @@
+<odoo>
+    <record id="view_kategori_buku_tree" model="ir.ui.view">
+        <field name="name">kategori.buku.tree</field>
+        <field name="model">kategori.buku</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="keterangan"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_kategori_buku_form" model="ir.ui.view">
+        <field name="name">kategori.buku.form</field>
+        <field name="model">kategori.buku</field>
+        <field name="arch" type="xml">
+           <form>
+               <sheet>
+                   <group>
+                       <field name="name"/>
+                       <field name="keterangan"/>
+                   </group>
+               </sheet>
+           </form>
+        </field>
+    </record>
+
+    <record id="action_kategori_buku" model="ir.actions.act_window">
+        <field name="name">Kategori Buku</field>
+        <field name="res_model">kategori.buku</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+
+</odoo>

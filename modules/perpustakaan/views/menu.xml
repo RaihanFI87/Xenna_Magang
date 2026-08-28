@@ -1,0 +1,24 @@
+<odoo>
+
+    <menuitem
+        id="menu_perpustakaan_root"
+        name="Perpustakaan"
+        sequence="10"
+    />
+    <menuitem
+        id="menu_master_data"
+        name="Master Data"
+        parent="menu_perpustakaan_root"
+        sequence="10"
+    />
+    <menuitem
+        id="menu_perpustakaan_buku"
+        name="Kategori Buku"
+        parent="menu_master_data"
+        action="action_kategori_buku"
+        sequence="10"
+    />
+</odoo>
+
+
+
