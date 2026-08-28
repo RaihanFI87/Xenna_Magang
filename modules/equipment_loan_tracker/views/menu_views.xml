@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem
+        id="menu_equipment_loan_tracker_root"
+        name="Equipment Loan Tracker"
+        sequence="10"
+    />
+
+    <menuitem
+        id="menu_equipment_item"
+        name="Equipment"
+        parent="menu_equipment_loan_tracker_root"
+        action="action_equipment_item"
+        sequence="10"
+    />
+
+
+    <menuitem
+        id="menu_equipment_loan"
+        name="Equipment Loans"
+        parent="menu_equipment_loan_tracker_root"
+        action="action_equipment_loan"
+        sequence="20"
+    />
+
+    <menuitem
+    id="menu_borrower"
+    name="Borrower"
+    parent="menu_equipment_loan_tracker_root"
+    action="borrower_action"
+    sequence="20"
+    />
+
+</odoo>

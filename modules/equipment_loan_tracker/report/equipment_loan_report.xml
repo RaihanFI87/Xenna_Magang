@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_equipment_loan" model="ir.actions.report">
+        <field name="name">Bukti Peminjaman</field>
+        <field name="model">equipment.loan</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">equipment_loan_tracker.report_equipment_loan_document</field>
+        <field name="report_file">equipment_loan_tracker.report_equipment_loan_document</field>
+        <field name="binding_model_id" ref="model_equipment_loan"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_equipment_loan_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="loan">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 class="text-center">
+                            BUKTI PEMINJAMAN ALAT
+                        </h2>
+                        <p class="text-center">
+                            Equipment Loan Tracker
+                        </p>
+                        <hr/>
+                        <table class="table table-bordered">
+                            <tr>
+                                <td>
+                                    <strong>No. Peminjaman</strong>
+                                </td>
+                                <td>
+                                    <span t-field="loan.name"/>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <strong>Peminjam</strong>
+                                </td>
+                                <td>
+                                    <span t-field="loan.borrower_id"/>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <strong>Alat</strong>
+                                </td>
+                                <td>
+                                    <span t-field="loan.equipment_id.name"/>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <strong>Kode Inventaris</strong>
+                                </td>
+                                <td>
+                                    <span t-field="loan.equipment_id.code"/>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <strong>Kategori</strong>
+                                </td>
+                                <td>
+                                    <span t-field="loan.equipment_id.category"/>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <strong>Tanggal Peminjaman</strong>
+                                </td>
+                                <td>
+                                    <span t-field="loan.loan_date"/>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <strong>Tanggal Jatuh Tempo</strong>
+                                </td>
+                                <td>
+                                    <span t-field="loan.due_date"/>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <strong>Tanggal Pengembalian</strong>
+                                </td>
+                                <td>
+                                    <span t-field="loan.return_date"/>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <strong>Status</strong>
+                                </td>
+                                <td>
+                                    <span t-field="loan.state"/>
+                                </td>
+                            </tr>
+                        </table>
+                        <br/>
+                        <strong>Catatan:</strong>
+                        <p>
+                            <span t-field="loan.line_notes"/>
+                        </p>
+
+                        <br/>
+                        <br/>
+
+                        <div class="text-center">
+                            <small>
+                                Bukti peminjaman ini dibuat secara otomatis
+                                oleh Equipment Loan Tracker.
+                            </small>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

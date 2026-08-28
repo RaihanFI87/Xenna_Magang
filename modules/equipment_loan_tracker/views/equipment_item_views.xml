@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <record id="view_equipment_item_list" model="ir.ui.view">
+        <field name="name">equipment.item.list</field>
+        <field name="model">equipment.item</field>
+        <field name="arch" type="xml">
+            <list string="Equipment">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="category"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_equipment_item_form" model="ir.ui.view">
+        <field name="name">equipment.item.form</field>
+        <field name="model">equipment.item</field>
+        <field name="arch" type="xml">
+            <form string="Equipment">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="name"/>
+                            <field name="category"/>
+                        </group>
+
+                        <group>
+                            <field name="state"/>
+                            <field name="notes"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_equipment_item" model="ir.actions.act_window">
+        <field name="name">Equipment</field>
+        <field name="res_model">equipment.item</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>
