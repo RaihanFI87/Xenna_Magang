@@ -1,0 +1,6 @@
+/odoo.conf
+/data/
+/backup/
+__pycache__/
+*.pyc
+.vscode/

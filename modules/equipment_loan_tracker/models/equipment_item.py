@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 class EquipmentItem(models.Model):
     _name = 'equipment.item'
@@ -19,7 +19,10 @@ class EquipmentItem(models.Model):
 
     code = fields.Char(
         string='Kode Inventaris',
-        required=True
+        required=True,
+        readonly=True,
+        copy=False,
+        default='New'
     )
 
     category = fields.Selection(
@@ -46,3 +49,13 @@ class EquipmentItem(models.Model):
     notes = fields.Text(
         string='Catatan'
     )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('code', 'New') == 'New':
+                vals['code'] = self.env['ir.sequence'].next_by_code(
+                    'equipment.item'
+                ) or 'New'
+
+        return super().create(vals_list)

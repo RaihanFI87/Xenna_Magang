@@ -41,30 +41,20 @@
                                 </td>
                             </tr>
 
-                            <tr>
+                           <tr>
                                 <td>
-                                    <strong>Alat</strong>
+                                    <strong>Daftar Alat</strong>
                                 </td>
                                 <td>
-                                    <span t-field="loan.equipment_id.name"/>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>
-                                    <strong>Kode Inventaris</strong>
-                                </td>
-                                <td>
-                                    <span t-field="loan.equipment_id.code"/>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>
-                                    <strong>Kategori</strong>
-                                </td>
-                                <td>
-                                    <span t-field="loan.equipment_id.category"/>
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <t t-foreach="loan.loan_line_ids" t-as="line">
+                                            <tr>
+                                                <td><span t-field="line.equipment_id.name"/></td>
+                                                <td><span t-field="line.equipment_id.code"/></td>
+                                                <td><span t-field="line.equipment_id.category"/></td>
+                                            </tr>
+                                        </t>
+                                    </table>
                                 </td>
                             </tr>
 

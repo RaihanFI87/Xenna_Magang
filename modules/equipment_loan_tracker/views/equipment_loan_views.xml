@@ -46,6 +46,13 @@
                         invisible="state not in ('ongoing', 'late')"
                     />
 
+                    <button
+                        name="%(equipment_loan_tracker.action_report_equipment_loan)d"
+                        type="action"
+                        string="Print"
+                        class="btn-secondary"
+                    />
+
                     <field
                         name="state"
                         widget="statusbar"
