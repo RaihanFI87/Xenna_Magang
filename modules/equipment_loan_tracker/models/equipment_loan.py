@@ -74,6 +74,7 @@ class EquipmentLoan(models.Model):
             ('ongoing', 'Ongoing'),
             ('returned', 'Returned'),
             ('late', 'Late'),
+            ('lost', 'Lost'),
         ],
         string='Status',
         default='draft',
@@ -83,12 +84,32 @@ class EquipmentLoan(models.Model):
     line_notes = fields.Text(
         string='Catatan'
     )
+
     equipment_names = fields.Char(
         string='Daftar Alat',
         compute='_compute_equipment_names'
     )
 
+    outgoing_picking_id = fields.Many2one(
+        'stock.picking',
+        string='Picking Keluar',
+        readonly=True,
+        copy=False
+    )
 
+    return_picking_id = fields.Many2one(
+        'stock.picking',
+        string='Picking Kembali',
+        readonly=True,
+        copy=False
+    )
+
+    penalty_invoice_id = fields.Many2one(
+        'account.move',
+        string='Invoice Denda',
+        readonly=True,
+        copy=False
+    )
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -120,7 +141,6 @@ class EquipmentLoan(models.Model):
                         'dari tanggal peminjaman.'
                     )
 
-    @api.constrains('equipment_id', 'state')
     @api.constrains('loan_line_ids', 'state')
     def _check_double_booking(self):
         for record in self:
@@ -140,6 +160,12 @@ class EquipmentLoan(models.Model):
                         'dan tidak dapat dipinjam kembali.'
                     )
 
+    def _get_loan_location(self):
+        return self.env.ref('equipment_loan_tracker.stock_location_loan')
+
+    def _get_source_location(self):
+        return self.env.ref('stock.stock_location_stock')
+
     def action_confirm(self):
         for record in self:
 
@@ -154,28 +180,56 @@ class EquipmentLoan(models.Model):
                     'dari tanggal peminjaman.'
                 )
 
+            source_location = record._get_source_location()
+            loan_location = record._get_loan_location()
+
             for line in record.loan_line_ids:
+                qty_available = line.equipment_id.with_context(
+                    location=source_location.id
+                ).qty_available
 
-                if line.equipment_id.state == 'damaged':
+                if qty_available < 1:
                     raise ValidationError(
-                        f'Alat "{line.equipment_id.name}" '
-                        'dalam kondisi rusak dan tidak dapat dipinjam.'
+                        f'Alat "{line.equipment_id.name}" tidak tersedia '
+                        'di lokasi stok dan tidak dapat dipinjam.'
                     )
 
-                if line.equipment_id.state == 'on_loan':
-                    raise ValidationError(
-                        f'Alat "{line.equipment_id.name}" '
-                        'sedang dipinjam dan tidak dapat dipinjam kembali.'
-                    )
+            picking_type = self.env.ref(
+                'equipment_loan_tracker.stock_picking_type_loan_out'
+            )
+
+            picking = self.env['stock.picking'].create({
+                'picking_type_id': picking_type.id,
+                'location_id': source_location.id,
+                'location_dest_id': loan_location.id,
+                'partner_id': record.borrower_id.id,
+                'origin': record.name,
+                'move_ids': [
+                    (0, 0, {
+                        'name': line.equipment_id.name,
+                        'product_id': line.equipment_id.id,
+                        'product_uom_qty': 1.0,
+                        'product_uom': line.equipment_id.uom_id.id,
+                        'location_id': source_location.id,
+                        'location_dest_id': loan_location.id,
+                    })
+                    for line in record.loan_line_ids
+                ],
+            })
+
+            picking.action_confirm()
+            picking.action_assign()
+
+            for move in picking.move_ids:
+                move.quantity = move.product_uom_qty
+                move.picked = True
+
+            picking.button_validate()
 
             record.write({
                 'state': 'ongoing',
+                'outgoing_picking_id': picking.id,
             })
-
-            for line in record.loan_line_ids:
-                line.equipment_id.write({
-                    'state': 'on_loan',
-                })
 
     def action_return(self):
         for record in self:
@@ -185,6 +239,41 @@ class EquipmentLoan(models.Model):
                     'Hanya peminjaman yang sedang berlangsung '
                     'atau terlambat yang dapat dikembalikan.'
                 )
+
+            source_location = record._get_source_location()
+            loan_location = record._get_loan_location()
+
+            picking_type = self.env.ref(
+                'equipment_loan_tracker.stock_picking_type_loan_return'
+            )
+
+            picking = self.env['stock.picking'].create({
+                'picking_type_id': picking_type.id,
+                'location_id': loan_location.id,
+                'location_dest_id': source_location.id,
+                'partner_id': record.borrower_id.id,
+                'origin': record.name,
+                'move_ids': [
+                    (0, 0, {
+                        'name': line.equipment_id.name,
+                        'product_id': line.equipment_id.id,
+                        'product_uom_qty': 1.0,
+                        'product_uom': line.equipment_id.uom_id.id,
+                        'location_id': loan_location.id,
+                        'location_dest_id': source_location.id,
+                    })
+                    for line in record.loan_line_ids
+                ],
+            })
+
+            picking.action_confirm()
+            picking.action_assign()
+
+            for move in picking.move_ids:
+                move.quantity = move.product_uom_qty
+                move.picked = True
+
+            picking.button_validate()
 
             today = fields.Date.context_today(self)
 
@@ -201,13 +290,50 @@ class EquipmentLoan(models.Model):
             record.write({
                 'state': new_state,
                 'return_date': today,
+                'return_picking_id': picking.id,
                 'line_notes': note,
             })
 
-            for line in record.loan_line_ids:
-                line.equipment_id.write({
-                    'state': 'available',
-                })
+    def action_lost(self):
+        for record in self:
+
+            if record.state not in ('ongoing', 'late'):
+                raise ValidationError(
+                    'Hanya peminjaman yang sedang berlangsung '
+                    'atau terlambat yang dapat dinyatakan hilang.'
+                )
+
+            lost_lines = record.loan_line_ids.filtered('is_lost')
+
+            if not lost_lines:
+                raise ValidationError(
+                    'Tandai minimal satu alat sebagai "Hilang" '
+                    'sebelum menandai peminjaman ini hilang.'
+                )
+
+            invoice_line_vals = []
+            for line in lost_lines:
+                penalty = line.equipment_id.loan_penalty_amount
+                invoice_line_vals.append((0, 0, {
+                    'product_id': line.equipment_id.id,
+                    'quantity': 1,
+                    'price_unit': penalty,
+                    'name': f'Denda kehilangan alat: {line.equipment_id.name}',
+                }))
+
+            invoice = self.env['account.move'].create({
+                'move_type': 'out_invoice',
+                'partner_id': record.borrower_id.id,
+                'invoice_origin': record.name,
+                'invoice_line_ids': invoice_line_vals,
+            })
+
+            invoice.action_post()
+
+            record.write({
+                'state': 'lost',
+                'penalty_invoice_id': invoice.id,
+            })
 
     @api.model
     def _cron_check_overdue(self):
@@ -221,7 +347,7 @@ class EquipmentLoan(models.Model):
         if loans:
             loans.write({
                 'state': 'late',
-                'line_notes':'kamu sudah terlambat'
+                'line_notes': 'kamu sudah terlambat'
             })
 
     @api.depends('loan_date', 'return_date')
@@ -245,6 +371,7 @@ class EquipmentLoan(models.Model):
                 record.loan_line_ids.mapped('equipment_id.name')
             )
 
+
 class EquipmentLoanLine(models.Model):
     _name = 'equipment.loan.line'
     _description = 'Equipment Loan Line'
@@ -257,10 +384,13 @@ class EquipmentLoanLine(models.Model):
     )
 
     equipment_id = fields.Many2one(
-        'equipment.item',
+        'product.product',
         string='Alat',
         required=True,
         ondelete='restrict'
     )
 
-
+    is_lost = fields.Boolean(
+        string='Hilang',
+        default=False
+    )

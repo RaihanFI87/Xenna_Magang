@@ -47,13 +47,13 @@
                                 </td>
                                 <td>
                                     <table class="table table-sm table-borderless mb-0">
-                                        <t t-foreach="loan.loan_line_ids" t-as="line">
-                                            <tr>
-                                                <td><span t-field="line.equipment_id.name"/></td>
-                                                <td><span t-field="line.equipment_id.code"/></td>
-                                                <td><span t-field="line.equipment_id.category"/></td>
-                                            </tr>
-                                        </t>
+                                    <t t-foreach="loan.loan_line_ids" t-as="line">
+                                        <tr>
+                                            <td><span t-field="line.equipment_id.name"/></td>
+                                            <td><span t-field="line.equipment_id.default_code"/></td>
+                                            <td><span t-field="line.equipment_id.categ_id"/></td>
+                                        </tr>
+                                    </t>
                                     </table>
                                 </td>
                             </tr>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="stock_location_loan" model="stock.location">
+        <field name="name">Peminjaman Alat</field>
+        <field name="usage">internal</field>
+        <field name="location_id" ref="stock.stock_location_locations"/>
+    </record>
+
+    <record id="stock_picking_type_loan_out" model="stock.picking.type">
+        <field name="name">Peminjaman Alat - Keluar</field>
+        <field name="code">internal</field>
+        <field name="sequence_code">LOAN-OUT</field>
+        <field name="warehouse_id" ref="stock.warehouse0"/>
+        <field name="default_location_src_id" ref="stock.stock_location_stock"/>
+        <field name="default_location_dest_id" ref="stock_location_loan"/>
+    </record>
+
+    <record id="stock_picking_type_loan_return" model="stock.picking.type">
+        <field name="name">Peminjaman Alat - Kembali</field>
+        <field name="code">internal</field>
+        <field name="sequence_code">LOAN-RET</field>
+        <field name="warehouse_id" ref="stock.warehouse0"/>
+        <field name="default_location_src_id" ref="stock_location_loan"/>
+        <field name="default_location_dest_id" ref="stock.stock_location_stock"/>
+    </record>
+
+</odoo>

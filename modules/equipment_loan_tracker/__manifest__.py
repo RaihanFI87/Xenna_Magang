@@ -14,18 +14,20 @@ Module untuk mengelola:
 - Status ketersediaan alat
 - Status transaksi peminjaman
 - Pengembalian alat
+- Pergerakan stok peminjaman lewat Inventory
+- Denda kehilangan otomatis lewat Invoicing
 """,
     'author': 'Xenna Magang',
     'website': '',
     'license': 'LGPL-3',
-    'depends': ['base'],
+    'depends': ['base', 'stock', 'account'],
     'data': [
         'security/ir.model.access.csv',
-        'data/equipment_item_sequence.xml',
         'data/equipment_loan_sequence.xml',
         'data/equipment_loan_cron.xml',
+        'data/stock_loan_data.xml',
         'views/borrower_views.xml',
-        'views/equipment_item_views.xml',
+        'views/product_template_views.xml',
         'report/equipment_loan_report.xml',
         'views/equipment_loan_views.xml',
         'views/menu_views.xml',

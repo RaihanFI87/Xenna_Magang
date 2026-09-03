@@ -1,4 +1,2 @@
-from . import equipment_item
+from . import product_template
 from . import equipment_loan
-
-

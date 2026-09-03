@@ -47,6 +47,14 @@
                     />
 
                     <button
+                        name="action_lost"
+                        type="object"
+                        string="Lost"
+                        class="btn-danger"
+                        invisible="state not in ('ongoing', 'late')"
+                    />
+
+                    <button
                         name="%(equipment_loan_tracker.action_report_equipment_loan)d"
                         type="action"
                         string="Print"
@@ -56,7 +64,7 @@
                     <field
                         name="state"
                         widget="statusbar"
-                        statusbar_visible="draft,ongoing,returned,late"
+                        statusbar_visible="draft,ongoing,returned,late,lost"
                     />
 
                 </header>
@@ -84,6 +92,7 @@
                     <field name="loan_line_ids">
                         <list editable="bottom">
                             <field name="equipment_id"/>
+                            <field name="is_lost"/>
                         </list>
                     </field>
                     <group>
