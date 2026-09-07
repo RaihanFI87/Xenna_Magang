@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 
@@ -89,6 +91,11 @@ class EquipmentLoan(models.Model):
         string='Daftar Alat',
         compute='_compute_equipment_names'
     )
+    
+    serial_numbers = fields.Char(
+        string='Nomor Serial',
+        compute='_compute_serial_numbers'
+    )
 
     outgoing_picking_id = fields.Many2one(
         'stock.picking',
@@ -108,6 +115,12 @@ class EquipmentLoan(models.Model):
         'account.move',
         string='Invoice Denda',
         readonly=True,
+        copy=False
+    )
+    
+    reminder_sent = fields.Boolean(
+        string='Reminder Terkirim',
+        default=False,
         copy=False
     )
 
@@ -141,23 +154,30 @@ class EquipmentLoan(models.Model):
                         'dari tanggal peminjaman.'
                     )
 
-    @api.constrains('loan_line_ids', 'state')
-    def _check_double_booking(self):
+    @api.constrains('loan_line_ids', 'state', 'loan_date', 'due_date')
+    def _check_date_overlap(self):
         for record in self:
-            if record.state not in ('ongoing', 'late'):
+            if record.state not in ('draft', 'ongoing', 'late'):
                 continue
 
             for line in record.loan_line_ids:
-                existing_lines = self.env['equipment.loan.line'].search([
+                overlapping_lines = self.env['equipment.loan.line'].search([
                     ('id', '!=', line.id),
                     ('equipment_id', '=', line.equipment_id.id),
-                    ('loan_id.state', 'in', ('ongoing', 'late')),
+                    ('lot_id', '=', line.lot_id.id),
+                    ('loan_id.state', 'in', ('draft', 'ongoing', 'late')),
+                    ('loan_id.loan_date', '<', record.due_date),
+                    ('loan_id.due_date', '>', record.loan_date),
                 ], limit=1)
 
-                if existing_lines:
+                if overlapping_lines:
+                    conflict = overlapping_lines.loan_id
                     raise ValidationError(
-                        f'Alat "{line.equipment_id.name}" sedang dipinjam '
-                        'dan tidak dapat dipinjam kembali.'
+                        f'Serial "{line.lot_id.name}" pada alat '
+                        f'"{line.equipment_id.name}" sudah dibooking di '
+                        f'peminjaman {conflict.name} pada rentang tanggal '
+                        f'{conflict.loan_date} - {conflict.due_date} '
+                        'yang overlap dengan peminjaman ini.'
                     )
 
     def _get_loan_location(self):
@@ -184,13 +204,17 @@ class EquipmentLoan(models.Model):
             loan_location = record._get_loan_location()
 
             for line in record.loan_line_ids:
-                qty_available = line.equipment_id.with_context(
-                    location=source_location.id
-                ).qty_available
+                available_qty = self.env['stock.quant']._get_available_quantity(
+                    line.equipment_id,
+                    source_location,
+                    lot_id=line.lot_id,
+                    strict=True
+                )
 
-                if qty_available < 1:
+                if available_qty < 1:
                     raise ValidationError(
-                        f'Alat "{line.equipment_id.name}" tidak tersedia '
+                        f'Serial "{line.lot_id.name}" pada alat '
+                        f'"{line.equipment_id.name}" tidak tersedia '
                         'di lokasi stok dan tidak dapat dipinjam.'
                     )
 
@@ -212,6 +236,15 @@ class EquipmentLoan(models.Model):
                         'product_uom': line.equipment_id.uom_id.id,
                         'location_id': source_location.id,
                         'location_dest_id': loan_location.id,
+                        'move_line_ids': [
+                            (0, 0, {
+                                'product_id': line.equipment_id.id,
+                                'lot_id': line.lot_id.id,
+                                'quantity': 1.0,
+                                'location_id': source_location.id,
+                                'location_dest_id': loan_location.id,
+                            })
+                        ],
                     })
                     for line in record.loan_line_ids
                 ],
@@ -261,6 +294,15 @@ class EquipmentLoan(models.Model):
                         'product_uom': line.equipment_id.uom_id.id,
                         'location_id': loan_location.id,
                         'location_dest_id': source_location.id,
+                        'move_line_ids': [
+                            (0, 0, {
+                                'product_id': line.equipment_id.id,
+                                'lot_id': line.lot_id.id,
+                                'quantity': 1.0,
+                                'location_id': loan_location.id,
+                                'location_dest_id': source_location.id,
+                            })
+                        ],
                     })
                     for line in record.loan_line_ids
                 ],
@@ -350,6 +392,30 @@ class EquipmentLoan(models.Model):
                 'line_notes': 'kamu sudah terlambat'
             })
 
+            template = self.env.ref(
+                'equipment_loan_tracker.mail_template_overdue_alert'
+            )
+            for loan in loans:
+                template.send_mail(loan.id, force_send=True)
+
+    @api.model
+    def _cron_send_due_date_reminder(self):
+        tomorrow = fields.Date.context_today(self) + timedelta(days=1)
+
+        loans = self.search([
+            ('state', '=', 'ongoing'),
+            ('due_date', '=', tomorrow),
+            ('reminder_sent', '=', False),
+        ])
+
+        template = self.env.ref(
+            'equipment_loan_tracker.mail_template_due_date_reminder'
+        )
+
+        for loan in loans:
+            template.send_mail(loan.id, force_send=True)
+            loan.reminder_sent = True
+
     @api.depends('loan_date', 'return_date')
     def _compute_loan_duration(self):
         today = fields.Date.context_today(self)
@@ -370,7 +436,13 @@ class EquipmentLoan(models.Model):
             record.equipment_names = ', '.join(
                 record.loan_line_ids.mapped('equipment_id.name')
             )
-
+            
+    @api.depends('loan_line_ids.lot_id')
+    def _compute_serial_numbers(self):
+        for record in self:
+            record.serial_numbers = ', '.join(
+                record.loan_line_ids.mapped('lot_id.name')
+            )
 
 class EquipmentLoanLine(models.Model):
     _name = 'equipment.loan.line'
@@ -389,6 +461,18 @@ class EquipmentLoanLine(models.Model):
         required=True,
         ondelete='restrict'
     )
+
+    lot_id = fields.Many2one(
+        'stock.lot',
+        string='Nomor Serial',
+        domain="[('product_id', '=', equipment_id)]",
+        required=True,
+        ondelete='restrict'
+    )
+
+    @api.onchange('equipment_id')
+    def _onchange_equipment_id(self):
+        self.lot_id = False
 
     is_lost = fields.Boolean(
         string='Hilang',

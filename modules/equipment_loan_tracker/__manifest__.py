@@ -25,6 +25,7 @@ Module untuk mengelola:
         'security/ir.model.access.csv',
         'data/equipment_loan_sequence.xml',
         'data/equipment_loan_cron.xml',
+        'data/mail_templates.xml',
         'data/stock_loan_data.xml',
         'views/borrower_views.xml',
         'views/product_template_views.xml',

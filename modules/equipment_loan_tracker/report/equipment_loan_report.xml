@@ -52,6 +52,7 @@
                                             <td><span t-field="line.equipment_id.name"/></td>
                                             <td><span t-field="line.equipment_id.default_code"/></td>
                                             <td><span t-field="line.equipment_id.categ_id"/></td>
+                                            <td><span t-field="line.lot_id.name"/></td>
                                         </tr>
                                     </t>
                                     </table>

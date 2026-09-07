@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="mail_template_due_date_reminder" model="mail.template">
+        <field name="name">Equipment Loan: Reminder H-1</field>
+        <field name="model_id" ref="equipment_loan_tracker.model_equipment_loan"/>
+        <field name="subject">Pengingat: Pengembalian {{ object.name }} jatuh tempo besok</field>
+        <field name="email_to">{{ object.borrower_id.email }}</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px;">
+                <p>Halo <t t-out="object.borrower_id.name"/>,</p>
+                <p>
+                    Ini pengingat bahwa peminjaman alat dengan nomor
+                    <strong t-out="object.name"/> harus dikembalikan
+                    <strong>besok</strong>.
+                </p>
+                <table style="border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 4px 8px;"><strong>Alat</strong></td>
+                        <td style="padding: 4px 8px;" t-out="object.equipment_names"/>
+                    </tr>
+                    <tr>
+                        <td style="padding: 4px 8px;"><strong>Nomor Serial</strong></td>
+                        <td style="padding: 4px 8px;" t-out="object.serial_numbers"/>
+                    </tr>
+                    <tr>
+                        <td style="padding: 4px 8px;"><strong>Tanggal Jatuh Tempo</strong></td>
+                        <td style="padding: 4px 8px;" t-out="object.due_date"/>
+                    </tr>
+                    <tr>
+                        <td style="padding: 4px 8px;"><strong>Status</strong></td>
+                        <td style="padding: 4px 8px;" t-out="object.state"/>
+                    </tr>
+                </table>
+                <p>Mohon segera dikembalikan tepat waktu. Terima kasih.</p>
+            </div>
+        </field>
+    </record>
+
+    <record id="mail_template_overdue_alert" model="mail.template">
+        <field name="name">Equipment Loan: Overdue Alert</field>
+        <field name="model_id" ref="equipment_loan_tracker.model_equipment_loan"/>
+        <field name="subject">PERINGATAN: {{ object.name }} sudah melewati jatuh tempo</field>
+        <field name="email_to">{{ object.borrower_id.email }}</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px;">
+                <p>Halo <t t-out="object.borrower_id.name"/>,</p>
+                <p>
+                    Peminjaman alat dengan nomor
+                    <strong t-out="object.name"/> sudah
+                    <strong style="color: #b71c1c;">melewati tanggal jatuh tempo</strong>
+                    dan belum dikembalikan.
+                </p>
+                <table style="border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 4px 8px;"><strong>Alat</strong></td>
+                        <td style="padding: 4px 8px;" t-out="object.equipment_names"/>
+                    </tr>
+                    <tr>
+                        <td style="padding: 4px 8px;"><strong>Nomor Serial</strong></td>
+                        <td style="padding: 4px 8px;" t-out="object.serial_numbers"/>
+                    </tr>
+                    <tr>
+                        <td style="padding: 4px 8px;"><strong>Tanggal Jatuh Tempo</strong></td>
+                        <td style="padding: 4px 8px;" t-out="object.due_date"/>
+                    </tr>
+                    <tr>
+                        <td style="padding: 4px 8px;"><strong>Status</strong></td>
+                        <td style="padding: 4px 8px;" t-out="object.state"/>
+                    </tr>
+                </table>
+                <p>Mohon segera dikembalikan atau hubungi admin. Terima kasih.</p>
+            </div>
+        </field>
+    </record>
+
+</odoo>

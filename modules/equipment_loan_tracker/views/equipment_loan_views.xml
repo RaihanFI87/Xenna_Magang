@@ -92,6 +92,7 @@
                     <field name="loan_line_ids">
                         <list editable="bottom">
                             <field name="equipment_id"/>
+                            <field name="lot_id"/>
                             <field name="is_lost"/>
                         </list>
                     </field>
