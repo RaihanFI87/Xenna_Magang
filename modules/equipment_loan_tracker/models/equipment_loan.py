@@ -6,6 +6,7 @@ from odoo.exceptions import ValidationError
 
 class EquipmentLoan(models.Model):
     _name = 'equipment.loan'
+    _inherit = ['portal.mixin']
     _description = 'Equipment Loan'
     _order = 'loan_date desc, id desc'
 
@@ -89,12 +90,14 @@ class EquipmentLoan(models.Model):
 
     equipment_names = fields.Char(
         string='Daftar Alat',
-        compute='_compute_equipment_names'
+        compute='_compute_equipment_names',
+        compute_sudo=True
     )
-    
+
     serial_numbers = fields.Char(
         string='Nomor Serial',
-        compute='_compute_serial_numbers'
+        compute='_compute_serial_numbers',
+        compute_sudo=True
     )
 
     outgoing_picking_id = fields.Many2one(
@@ -185,6 +188,11 @@ class EquipmentLoan(models.Model):
 
     def _get_source_location(self):
         return self.env.ref('stock.stock_location_stock')
+    
+    def _compute_access_url(self):
+        super()._compute_access_url()
+        for loan in self:
+            loan.access_url = f'/my/equipment-loans/{loan.id}'
 
     def action_confirm(self):
         for record in self:

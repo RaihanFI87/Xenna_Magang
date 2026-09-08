@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="portal_my_home_equipment_loan" inherit_id="portal.portal_my_home">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Peminjaman Alat</t>
+                <t t-set="url" t-value="'/my/equipment-loans'"/>
+                <t t-set="placeholder_count" t-value="'loan_count'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="portal_my_loans" name="Daftar Peminjaman Saya">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <div class="o_portal_my_doc_table">
+                <table class="table table-hover o_portal_my_doc_table" t-if="loans">
+                    <thead>
+                        <tr class="active">
+                            <th>Nomor Peminjaman</th>
+                            <th>Alat</th>
+                            <th>Nomor Serial</th>
+                            <th>Tanggal Pinjam</th>
+                            <th>Jatuh Tempo</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="loans" t-as="loan">
+                            <td>
+                                <a t-attf-href="/my/equipment-loans/#{loan.id}">
+                                    <span t-field="loan.name"/>
+                                </a>
+                            </td>
+                            <td><span t-field="loan.equipment_names"/></td>
+                            <td><span t-field="loan.serial_numbers"/></td>
+                            <td><span t-field="loan.loan_date"/></td>
+                            <td><span t-field="loan.due_date"/></td>
+                            <td><span t-field="loan.state"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p t-if="not loans">Belum ada riwayat peminjaman.</p>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_loan_detail" name="Detail Peminjaman">
+        <t t-call="portal.portal_layout">
+            <div class="container">
+                <h3>
+                    Peminjaman
+                    <span t-field="loan.name"/>
+                </h3>
+                <table class="table">
+                    <tr>
+                        <td><strong>Alat</strong></td>
+                        <td><span t-field="loan.equipment_names"/></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Nomor Serial</strong></td>
+                        <td><span t-field="loan.serial_numbers"/></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tanggal Peminjaman</strong></td>
+                        <td><span t-field="loan.loan_date"/></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tanggal Jatuh Tempo</strong></td>
+                        <td><span t-field="loan.due_date"/></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tanggal Pengembalian</strong></td>
+                        <td><span t-field="loan.return_date"/></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Status</strong></td>
+                        <td><span t-field="loan.state"/></td>
+                    </tr>
+                    <tr t-if="loan.penalty_invoice_id">
+                        <td><strong>Invoice Denda</strong></td>
+                        <td>
+                            <a t-attf-href="/my/invoices/#{loan.penalty_invoice_id.id}?access_token=#{loan.penalty_invoice_id.access_token}">
+                                Lihat Invoice
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </t>
+    </template>
+
+</odoo>

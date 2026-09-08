@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_equipment_loan_user,equipment.loan user,model_equipment_loan,base.group_user,1,1,1,1
 access_equipment_loan_line_user,equipment.loan.line user,model_equipment_loan_line,base.group_user,1,1,1,1
+access_equipment_loan_portal,equipment.loan portal read,model_equipment_loan,base.group_portal,1,0,0,0
+access_equipment_loan_line_portal,equipment.loan.line portal read,model_equipment_loan_line,base.group_portal,1,0,0,0

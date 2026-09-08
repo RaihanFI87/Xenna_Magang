@@ -20,9 +20,11 @@ Module untuk mengelola:
     'author': 'Xenna Magang',
     'website': '',
     'license': 'LGPL-3',
-    'depends': ['base', 'stock', 'account'],
+    'depends': ['base', 'stock', 'account', 'portal'],
     'data': [
         'security/ir.model.access.csv',
+        'security/equipment_loan_security.xml',
+        'views/portal_templates.xml',
         'data/equipment_loan_sequence.xml',
         'data/equipment_loan_cron.xml',
         'data/mail_templates.xml',
