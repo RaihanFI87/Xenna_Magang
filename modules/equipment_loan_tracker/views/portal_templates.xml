@@ -15,6 +15,12 @@
         <t t-call="portal.portal_layout">
             <t t-set="breadcrumbs_searchbar" t-value="True"/>
 
+            <div class="mb-3">
+                <a href="/my/equipment-loans/new" class="btn btn-primary">
+                    Ajukan Peminjaman Baru
+                </a>
+            </div>
+
             <div class="o_portal_my_doc_table">
                 <table class="table table-hover o_portal_my_doc_table" t-if="loans">
                     <thead>
@@ -88,8 +94,128 @@
                         </td>
                     </tr>
                 </table>
+
+                <div t-if="loan.state in ('ongoing', 'late')" class="mb-3">
+                    <a t-attf-href="/my/equipment-loans/#{loan.id}/extend"
+                       class="btn btn-outline-primary">
+                        Ajukan Perpanjangan
+                    </a>
+                </div>
+
+                <h5 t-if="loan.extension_request_ids">Riwayat Pengajuan Perpanjangan</h5>
+                <table class="table" t-if="loan.extension_request_ids">
+                    <thead>
+                        <tr>
+                            <th>Tanggal Diajukan</th>
+                            <th>Tanggal Baru Diajukan</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="loan.extension_request_ids" t-as="req">
+                            <td><span t-field="req.create_date"/></td>
+                            <td><span t-field="req.requested_due_date"/></td>
+                            <td><span t-field="req.state"/></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </t>
     </template>
+        <template id="portal_new_loan" name="Ajukan Peminjaman Baru">
+        <t t-call="portal.portal_layout">
+            <div class="container">
+                <h3>Ajukan Peminjaman Alat</h3>
 
+                <div class="alert alert-danger" t-if="error">
+                    <span t-esc="error"/>
+                </div>
+
+                <form action="/my/equipment-loans/new" method="post">
+                    <input type="hidden" name="csrf_token"
+                           t-att-value="request.csrf_token()"/>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label>Tanggal Peminjaman</label>
+                            <input type="date" name="loan_date"
+                                   class="form-control" required="required"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Tanggal Jatuh Tempo</label>
+                            <input type="date" name="due_date"
+                                   class="form-control" required="required"/>
+                        </div>
+                    </div>
+
+                    <h5>Pilih Alat yang Tersedia</h5>
+                    <table class="table table-hover" t-if="available_lots">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Alat</th>
+                                <th>Nomor Serial</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="available_lots" t-as="lot">
+                                <td>
+                                    <input type="checkbox" name="lot_ids"
+                                           t-att-value="lot.id"/>
+                                </td>
+                                <td><span t-field="lot.product_id.name"/></td>
+                                <td><span t-field="lot.name"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p t-if="not available_lots">
+                        Tidak ada alat yang tersedia saat ini.
+                    </p>
+
+                    <button type="submit" class="btn btn-primary">
+                        Ajukan Peminjaman
+                    </button>
+                </form>
+            </div>
+        </t>
+    </template>
+    <template id="portal_extend_request" name="Ajukan Perpanjangan">
+        <t t-call="portal.portal_layout">
+            <div class="container">
+                <h3>
+                    Ajukan Perpanjangan —
+                    <span t-field="loan.name"/>
+                </h3>
+
+                <div class="alert alert-danger" t-if="error">
+                    <span t-esc="error"/>
+                </div>
+
+                <p>
+                    Tanggal jatuh tempo saat ini:
+                    <strong t-field="loan.due_date"/>
+                </p>
+
+                <form t-attf-action="/my/equipment-loans/#{loan.id}/extend" method="post">
+                    <input type="hidden" name="csrf_token"
+                           t-att-value="request.csrf_token()"/>
+
+                    <div class="mb-3">
+                        <label>Tanggal Jatuh Tempo Baru</label>
+                        <input type="date" name="requested_due_date"
+                               class="form-control" required="required"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Alasan (opsional)</label>
+                        <textarea name="reason" class="form-control"/>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Kirim Pengajuan
+                    </button>
+                </form>
+            </div>
+        </t>
+    </template>
 </odoo>

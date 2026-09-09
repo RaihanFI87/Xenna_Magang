@@ -1,5 +1,11 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_equipment_loan_user,equipment.loan user,model_equipment_loan,base.group_user,1,1,1,1
 access_equipment_loan_line_user,equipment.loan.line user,model_equipment_loan_line,base.group_user,1,1,1,1
-access_equipment_loan_portal,equipment.loan portal read,model_equipment_loan,base.group_portal,1,0,0,0
-access_equipment_loan_line_portal,equipment.loan.line portal read,model_equipment_loan_line,base.group_portal,1,0,0,0
+access_equipment_loan_portal,equipment.loan portal read/create,model_equipment_loan,base.group_portal,1,0,1,0
+access_equipment_loan_line_portal,equipment.loan.line portal read/create,model_equipment_loan_line,base.group_portal,1,0,1,0
+access_product_product_portal,product.product portal read,product.model_product_product,base.group_portal,1,0,0,0
+access_stock_lot_portal,stock.lot portal read,stock.model_stock_lot,base.group_portal,1,0,0,0
+access_uom_uom_portal,uom.uom portal read,uom.model_uom_uom,base.group_portal,1,0,0,0
+access_ir_sequence_portal,ir.sequence portal read,base.model_ir_sequence,base.group_portal,1,0,0,0
+access_equipment_loan_extension_request_user,equipment.loan.extension.request user,model_equipment_loan_extension_request,base.group_user,1,1,1,1
+access_equipment_loan_extension_request_portal,equipment.loan.extension.request portal,model_equipment_loan_extension_request,base.group_portal,1,0,1,0

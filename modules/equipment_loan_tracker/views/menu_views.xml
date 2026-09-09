@@ -21,4 +21,12 @@
         action="borrower_action"
         sequence="20"
     />
+
+    <menuitem
+    id="menu_extension_request"
+    name="Extension Requests"
+    parent="menu_equipment_loan_tracker_root"
+    action="action_extension_request"
+    sequence="30"
+    />
 </odoo>

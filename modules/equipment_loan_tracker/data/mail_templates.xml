@@ -73,5 +73,48 @@
             </div>
         </field>
     </record>
-
+        <record id="mail_template_extension_approved" model="mail.template">
+        <field name="name">Extension Request: Approved</field>
+        <field name="model_id" ref="model_equipment_loan_extension_request"/>
+        <field name="subject">Perpanjangan {{ object.loan_id.name }} disetujui</field>
+        <field name="email_to">{{ object.loan_id.borrower_id.email }}</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px;">
+                <p>Halo <t t-out="object.loan_id.borrower_id.name"/>,</p>
+                <p>
+                    Pengajuan perpanjangan peminjaman
+                    <strong t-out="object.loan_id.name"/> telah
+                    <strong style="color: #2e7d32;">DISETUJUI</strong>.
+                </p>
+                <table style="border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 4px 8px;"><strong>Tanggal Jatuh Tempo Baru</strong></td>
+                        <td style="padding: 4px 8px;" t-out="object.requested_due_date"/>
+                    </tr>
+                </table>
+                <p>Terima kasih.</p>
+            </div>
+        </field>
+    </record>
+    <record id="mail_template_extension_rejected" model="mail.template">
+        <field name="name">Extension Request: Rejected</field>
+        <field name="model_id" ref="model_equipment_loan_extension_request"/>
+        <field name="subject">Perpanjangan {{ object.loan_id.name }} ditolak</field>
+        <field name="email_to">{{ object.loan_id.borrower_id.email }}</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px;">
+                <p>Halo <t t-out="object.loan_id.borrower_id.name"/>,</p>
+                <p>
+                    Mohon maaf, pengajuan perpanjangan peminjaman
+                    <strong t-out="object.loan_id.name"/> telah
+                    <strong style="color: #b71c1c;">DITOLAK</strong>.
+                </p>
+                <p>
+                    Tanggal jatuh tempo tetap
+                    <strong t-out="object.loan_id.due_date"/>.
+                    Silakan kembalikan alat tepat waktu atau hubungi admin.
+                </p>
+            </div>
+        </field>
+    </record>
 </odoo>

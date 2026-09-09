@@ -126,6 +126,12 @@ class EquipmentLoan(models.Model):
         default=False,
         copy=False
     )
+    
+    extension_request_ids = fields.One2many(
+        'equipment.loan.extension.request',
+        'loan_id',
+        string='Riwayat Perpanjangan'
+    )
 
     @api.model_create_multi
     def create(self, vals_list):

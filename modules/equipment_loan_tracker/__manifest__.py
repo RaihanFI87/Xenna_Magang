@@ -31,6 +31,7 @@ Module untuk mengelola:
         'data/stock_loan_data.xml',
         'views/borrower_views.xml',
         'views/product_template_views.xml',
+        'views/equipment_loan_extension_request_views.xml',
         'report/equipment_loan_report.xml',
         'views/equipment_loan_views.xml',
         'views/menu_views.xml',
